@@ -1,0 +1,1265 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Andro iray toa zato — Mon carnet de mariage</title>
+  <link rel="manifest" href="/manifest.json"/>
+  <meta name="theme-color" content="#B8895A"/>
+  <meta name="apple-mobile-web-app-capable" content="yes"/>
+  <meta name="apple-mobile-web-app-status-bar-style" content="default"/>
+  <meta name="apple-mobile-web-app-title" content="Andro iray"/>
+  <link rel="apple-touch-icon" href="/icon-192.png"/>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400;1,500&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400;1,600&family=DM+Sans:wght@200;300;400&display=swap" rel="stylesheet"/>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{background:#F5EFE8;min-height:100vh;}
+    ::-webkit-scrollbar{width:4px;}
+    ::-webkit-scrollbar-track{background:transparent;}
+    ::-webkit-scrollbar-thumb{background:#C8A898;border-radius:2px;}
+    @media print{.no-print{display:none!important;}body{background:white;}}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(32px)}to{opacity:1;transform:translateY(0)}}
+    @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .fu1{animation:fadeUp 1.2s .1s cubic-bezier(.16,1,.3,1) both}
+    .fu2{animation:fadeUp 1.2s .35s cubic-bezier(.16,1,.3,1) both}
+    .fu3{animation:fadeUp 1.2s .6s cubic-bezier(.16,1,.3,1) both}
+    .fu4{animation:fadeIn 1.4s .85s both}
+    .spinner{width:22px;height:22px;border:2px solid rgba(255,255,255,0.3);border-top-color:white;border-radius:50%;animation:spin .7s linear infinite;display:inline-block}
+    input[type=file]{display:none}
+    .photo-zone{border:1.5px dashed #C8A898;border-radius:12px;padding:20px;text-align:center;cursor:pointer;transition:all .25s;background:rgba(255,255,255,0.35);backdrop-filter:blur(4px)}
+    .photo-zone:hover{border-color:#B86870;background:rgba(244,225,220,0.45)}
+    button:focus,select:focus,input:focus,textarea:focus{outline:none;}
+  </style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { useState, useEffect, useCallback, useRef } = React;
+
+// ══════════════════════════════════════════════════════════════════════════
+// ⚙️  CONFIGURATION SUPABASE — Remplacez ces deux valeurs !
+// ══════════════════════════════════════════════════════════════════════════
+const SUPABASE_URL = "https://jaqlwmlxtmjmjbafsiyc.supabase.co";       // ex: https://xxxx.supabase.co
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImphcWx3bWx4dG1qbWpiYWZzaXljIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzMyMjA1MzksImV4cCI6MjA4ODc5NjUzOX0.NHA5xAr1oFexTFtS12jAMRsHK6oJVIBSbfzBaqgJ804"; // clé "anon public"
+// ══════════════════════════════════════════════════════════════════════════
+
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+// ── Palette & Fonts ───────────────────────────────────────────────────────
+const P={bg:"#F5EFE8",paper:"rgba(255,252,248,0.75)",blush:"#EDD5CC",blushMd:"#D9B4A8",blushDk:"#C4907E",rose:"#B86870",roseDk:"#8A4850",gold:"#B8895A",goldLt:"#DEC898",cream:"#FDF8F2",line:"#E0CEC4",lineLt:"#EDE0D8",dark:"#2E2018",mid:"#7A5E52",light:"#F0E8E0",white:"#FFFFFF",warm:"#F8F2EC"};
+const F={script:"'Cormorant Garamond',serif",display:"'Playfair Display',serif",body:"'DM Sans',sans-serif"};
+
+// ── SVG backgrounds ───────────────────────────────────────────────────────
+function WatercolorBg(){
+  return(
+    <svg style={{position:"fixed",inset:0,width:"100%",height:"100%",pointerEvents:"none",zIndex:0}} preserveAspectRatio="xMidYMid slice" viewBox="0 0 1200 900">
+      <defs>
+        <filter id="wb1"><feGaussianBlur stdDeviation="45"/></filter>
+        <filter id="wb2"><feGaussianBlur stdDeviation="65"/></filter>
+      </defs>
+      <ellipse cx="150" cy="120" rx="320" ry="240" fill="#DDD0C0" opacity="0.32" filter="url(#wb2)"/>
+      <ellipse cx="800" cy="300" rx="280" ry="200" fill="#D4A898" opacity="0.20" filter="url(#wb2)"/>
+      <ellipse cx="1100" cy="150" rx="220" ry="180" fill="#C8AA78" opacity="0.16" filter="url(#wb1)"/>
+      <ellipse cx="200" cy="780" rx="300" ry="200" fill="#C8B8A8" opacity="0.22" filter="url(#wb2)"/>
+      <ellipse cx="700" cy="820" rx="260" ry="160" fill="#D0A090" opacity="0.16" filter="url(#wb2)"/>
+      <ellipse cx="550" cy="450" rx="350" ry="280" fill="#EAD8C8" opacity="0.13" filter="url(#wb2)"/>
+    </svg>
+  );
+}
+
+function OilStroke({color="#D9B4A8",opacity=0.5,height=5}){
+  return(
+    <svg style={{display:"block",width:"100%",height,overflow:"visible"}} viewBox="0 0 400 10" preserveAspectRatio="none">
+      <path d="M2,6 C30,3 70,7 120,5 C170,3 200,7 250,5 C300,3 340,7 398,5" fill="none" stroke={color} strokeWidth="5" strokeLinecap="round" opacity={opacity}/>
+      <path d="M2,7 C40,5 80,8 130,6 C180,4 220,8 270,6 C320,4 360,8 398,6" fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" opacity={opacity*0.5}/>
+    </svg>
+  );
+}
+
+function FloralCorner({size=220,mirror=false,flip=false,color="#C4907E",opacity=0.18}){
+  const tx=mirror?-size:0,ty=flip?-size:0;
+  return(
+    <svg width={size} height={size} viewBox="0 0 220 220" style={{display:"block",opacity}}>
+      <g transform={`translate(${tx},${ty}) scale(${mirror?-1:1},${flip?-1:1})`} fill="none" stroke={color} strokeLinecap="round" strokeLinejoin="round">
+        <g transform="translate(160,30)">
+          {[-40,-25,-10,5,20,35].map((a,i)=>(
+            <path key={i} d={`M0,0 C${Math.sin((a+30)*Math.PI/180)*30},${-50-i*4} ${Math.sin(a*Math.PI/180)*35},${-75-i*3} ${Math.cos(a*Math.PI/180)*20},${-95-i*2}`} strokeWidth={1.8-i*0.1} strokeOpacity={0.9-i*0.05}/>
+          ))}
+          <path d="M0,0 C-5,10 -3,20 0,25" strokeWidth="1.4"/>
+        </g>
+        <g transform="translate(110,70) rotate(-30)">
+          {[-25,-10,5,20].map((a,i)=>(
+            <path key={i} d={`M0,0 C${Math.sin((a+20)*Math.PI/180)*20},${-35-i*3} ${Math.sin(a*Math.PI/180)*25},${-55-i*2} ${Math.cos(a*Math.PI/180)*15},-70`} strokeWidth={1.4-i*0.1} strokeOpacity={0.7}/>
+          ))}
+        </g>
+        <path d="M160,30 C150,60 140,90 130,130 C120,160 115,180 118,210" strokeWidth="1.2" strokeOpacity="0.4"/>
+        <g transform="translate(50,170)">
+          {[0,60,120,180,240,300].map((a,i)=>(
+            <path key={i} d={`M0,0 L${Math.cos(a*Math.PI/180)*14},${Math.sin(a*Math.PI/180)*14}`} strokeWidth="1" strokeOpacity="0.5"/>
+          ))}
+          <circle cx="0" cy="0" r="4" strokeWidth="1" strokeOpacity="0.6"/>
+        </g>
+      </g>
+    </svg>
+  );
+}
+
+// ── UI Components ─────────────────────────────────────────────────────────
+const ST=(s,e={})=>({fontFamily:F.script,fontStyle:"italic",fontSize:s,lineHeight:1.2,...e});
+const DT=(s,e={})=>({fontFamily:F.display,fontWeight:500,fontSize:s,letterSpacing:3,textTransform:"uppercase",...e});
+const BT=(s,e={})=>({fontFamily:F.body,fontWeight:300,fontSize:s,lineHeight:1.65,...e});
+
+function Lbl({c}){return <div style={{fontFamily:F.body,fontWeight:300,fontSize:9,color:P.rose,textTransform:"uppercase",letterSpacing:2.5,marginBottom:5}}>{c}</div>;}
+
+function SHead({script,display,color=P.blush}){
+  return(
+    <div style={{marginBottom:22}}>
+      <div style={{...ST(24),color:P.dark,marginBottom:4}}>{script}</div>
+      <OilStroke color={color} opacity={0.6} height={5}/>
+      {display&&<div style={{...BT(9),letterSpacing:2,textTransform:"uppercase",color:P.mid,marginTop:7}}>{display}</div>}
+    </div>
+  );
+}
+
+function Card({children,style={}}){
+  return(
+    <div style={{background:"rgba(255,252,248,0.72)",backdropFilter:"blur(12px)",WebkitBackdropFilter:"blur(12px)",borderRadius:18,border:"1px solid rgba(220,200,185,0.5)",boxShadow:"0 4px 32px rgba(180,140,100,0.10)",marginBottom:18,overflow:"hidden",position:"relative",zIndex:1,...style}}>
+      {children}
+    </div>
+  );
+}
+function CI({children,pad="24px 28px"}){return <div style={{padding:pad}}>{children}</div>;}
+function BB({children,style={}}){
+  return <div style={{background:"rgba(237,213,204,0.35)",border:"1px solid rgba(210,180,165,0.4)",borderRadius:12,padding:"12px 16px",...style}}>{children}</div>;
+}
+function IL({label,value,onChange,placeholder="",type="text"}){
+  const [f,sf]=useState(false);
+  return(
+    <div style={{marginBottom:16}}>
+      <Lbl c={label}/>
+      <input type={type} value={value} onChange={e=>onChange(e.target.value)} placeholder={placeholder}
+        style={{width:"100%",boxSizing:"border-box",border:"none",borderBottom:`1.5px solid ${f?P.rose:P.line}`,background:"transparent",padding:"6px 0",fontFamily:F.script,fontStyle:"italic",fontSize:15,color:P.dark,transition:"border-color .25s"}}
+        onFocus={()=>sf(true)} onBlur={()=>sf(false)}/>
+    </div>
+  );
+}
+function TA({label,value,onChange,rows=5,placeholder=""}){
+  const [f,sf]=useState(false);
+  return(
+    <div style={{marginBottom:16}}>
+      {label&&<Lbl c={label}/>}
+      <div style={{position:"relative",background:"rgba(253,248,242,0.7)",borderRadius:10,border:`1px solid ${f?"rgba(184,104,112,0.5)":P.line}`,overflow:"hidden",transition:"border-color .25s"}}>
+        <div style={{position:"absolute",inset:0,backgroundImage:`radial-gradient(circle,rgba(210,175,160,0.3) 1px,transparent 1px)`,backgroundSize:"22px 22px",pointerEvents:"none"}}/>
+        <textarea value={value} onChange={e=>onChange(e.target.value)} rows={rows} placeholder={placeholder}
+          style={{position:"relative",zIndex:1,width:"100%",border:"none",background:"transparent",padding:"14px 16px",fontFamily:F.script,fontStyle:"italic",fontSize:15,color:P.dark,resize:"vertical",lineHeight:2,boxSizing:"border-box"}}
+          onFocus={()=>sf(true)} onBlur={()=>sf(false)}/>
+      </div>
+    </div>
+  );
+}
+function BC({label,checked,onChange}){
+  return(
+    <div onClick={()=>onChange(!checked)} style={{display:"flex",alignItems:"flex-start",gap:10,cursor:"pointer",padding:"6px 8px",borderRadius:8,background:checked?"rgba(184,104,112,0.09)":"transparent",transition:"background .2s",marginBottom:2}}>
+      <div style={{position:"relative",width:20,height:14,flexShrink:0,marginTop:3}}>
+        <div style={{position:"absolute",inset:0,background:checked?`linear-gradient(115deg,${P.rose},${P.roseDk})`:"rgba(210,185,175,0.5)",borderRadius:7,transition:"all .25s"}}/>
+        {checked&&<div style={{position:"absolute",inset:0,display:"flex",alignItems:"center",justifyContent:"center"}}><div style={{width:7,height:4,borderLeft:"1.5px solid white",borderBottom:"1.5px solid white",transform:"rotate(-45deg)",marginTop:-1}}/></div>}
+      </div>
+      <div style={{...BT(13),color:checked?P.mid:P.dark,textDecoration:checked?"line-through":"none",transition:"all .2s"}}>{label}</div>
+    </div>
+  );
+}
+function Tg({label,active,onClick}){
+  return <span onClick={onClick} style={{display:"inline-block",padding:"6px 15px",borderRadius:30,border:`1.5px solid ${active?P.rose:P.line}`,background:active?"rgba(184,104,112,0.12)":"rgba(255,252,248,0.5)",color:active?P.roseDk:P.mid,fontFamily:F.body,fontWeight:300,fontSize:12,cursor:"pointer",margin:"3px",transition:"all .2s"}}>{label}</span>;
+}
+
+// ── Countdown ─────────────────────────────────────────────────────────────
+function Countdown({weddingDate}){
+  const [t,st]=useState({days:0,hours:0,min:0,sec:0});
+  useEffect(()=>{
+    if(!weddingDate)return;
+    const tick=()=>{
+      const d=new Date(weddingDate)-new Date();
+      if(d<=0){st({days:0,hours:0,min:0,sec:0});return;}
+      st({days:Math.floor(d/86400000),hours:Math.floor((d%86400000)/3600000),min:Math.floor((d%3600000)/60000),sec:Math.floor((d%60000)/1000)});
+    };
+    tick();const id=setInterval(tick,1000);return()=>clearInterval(id);
+  },[weddingDate]);
+  if(!weddingDate)return <BB style={{textAlign:"center",padding:"24px"}}><div style={{...BT(12),fontStyle:"italic",color:P.mid}}>Renseignez votre date dans "Nous deux"</div></BB>;
+  return(
+    <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:12,textAlign:"center"}}>
+      {[{v:t.days,l:"Jours"},{v:t.hours,l:"Heures"},{v:t.min,l:"Minutes"},{v:t.sec,l:"Secondes"}].map(({v,l})=>(
+        <div key={l} style={{background:"rgba(237,213,204,0.4)",border:"1px solid rgba(210,180,165,0.4)",borderRadius:16,padding:"20px 8px",backdropFilter:"blur(6px)"}}>
+          <div style={{...ST(38),color:P.rose}}>{String(v).padStart(2,"0")}</div>
+          <div style={{...BT(9),textTransform:"uppercase",letterSpacing:2,marginTop:4,color:P.mid}}>{l}</div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// ── DATA defaults ─────────────────────────────────────────────────────────
+const PALETTES=[{name:"Rose Poudré",colors:["#F2D9D9","#E8C4C4","#C47E88","#C4986A","#3A2830"],desc:"Romantique"},{name:"Blush Ivoire",colors:["#F5EDE0","#E8D8C0","#C8A070","#8A6040","#2A1810"],desc:"Chaleureux"},{name:"Sauge & Lin",colors:["#D8E8D2","#B8C8B0","#7A9870","#E8D0B0","#2A3020"],desc:"Nature"},{name:"Mauve Brume",colors:["#E0D0E0","#C8A8C8","#9870A8","#E8D0B0","#2A1830"],desc:"Poétique"},{name:"Champagne Doré",colors:["#F5EDD8","#E8D0A0","#C4986A","#8A6840","#2A2010"],desc:"Luxueux"},{name:"Pêche Corail",colors:["#FAE0D0","#F0C0A8","#D88060","#C4986A","#3A2020"],desc:"Estival"},{name:"Bordeaux Nude",colors:["#F0E0DC","#D8A0A0","#8B3252","#C4986A","#2A1018"],desc:"Profond"},{name:"Menthe Dorée",colors:["#D8EEE0","#A8D8B8","#60A880","#C4986A","#182820"],desc:"Frais"},{name:"Lilas Pastel",colors:["#EDE0F0","#D0B8E0","#9878C0","#E8D0B0","#201028"],desc:"Féerique"},{name:"Terracotta",colors:["#F5E0D0","#E8B898","#C87848","#8A5030","#2A1808"],desc:"Bohème"},{name:"Bleu Céleste",colors:["#D8E8F5","#A8C8E8","#5888C0","#C4986A","#102030"],desc:"Aérien"},{name:"Nude Minimaliste",colors:["#F5F0EC","#E8E0D8","#C8B8A8","#9A8878","#2A2018"],desc:"Épuré"}];
+const STYLES_LIST=["Romantique","Champêtre","Bohème","Élégant","Luxueux","Minimaliste","Vintage","Tropical","Moderne","Rustique","Côtier","Forestier","Oriental","Baroque","Contemporain"];
+const TODOS_DEF={
+  "12 mois avant":[{label:"Définir le budget global",done:false},{label:"Choisir la date du mariage",done:false},{label:"Visiter & réserver la salle de réception",done:false},{label:"Commencer la liste des invités",done:false},{label:"Réserver la lune de miel",done:false},{label:"Planifier le Vodiondry",done:false}],
+  "9 mois avant":[{label:"Réserver photographe & vidéaste",done:false},{label:"Choisir et réserver le traiteur",done:false},{label:"Envoyer les save-the-date",done:false},{label:"Commencer à chercher la robe",done:false},{label:"Réserver le groupe / DJ",done:false},{label:"Choisir les témoins",done:false}],
+  "6 mois avant":[{label:"Envoyer les faire-part officiels",done:false},{label:"Commander la robe de mariée",done:false},{label:"Réserver coiffeur & maquilleur(se)",done:false},{label:"Choisir et commander les alliances",done:false},{label:"Finaliser le plan de table",done:false},{label:"Préparer les documents mariage civil",done:false}],
+  "3 mois avant":[{label:"Confirmer tous les prestataires",done:false},{label:"Premier essayage robe",done:false},{label:"Préparer les discours & vœux",done:false},{label:"Dossier mariage civil complet",done:false}],
+  "1 mois avant":[{label:"Essayage final robe",done:false},{label:"Relancer les confirmations",done:false},{label:"Préparer les enveloppes prestataires",done:false},{label:"Briefer les témoins",done:false}],
+  "Semaine J":[{label:"Manucure & soins beauté",done:false},{label:"Livraison de la robe",done:false},{label:"Répétition cérémonie",done:false},{label:"Préparer les bagages voyage de noces",done:false},{label:"Se reposer & profiter ♡",done:false}],
+};
+const BUDGET_DEF=[
+  {section:"Vodiondry",color:"#B8895A",items:[{cat:"Salle / Lieu",note:"Location",prevu:"",reel:"",paye:""},{cat:"Traiteur",note:"Repas & boissons",prevu:"",reel:"",paye:""},{cat:"Tenue",note:"Tenues familles",prevu:"",reel:"",paye:""},{cat:"Cadeaux traditionnels",note:"Dot & présents",prevu:"",reel:"",paye:""},{cat:"Décoration",note:"Fleurs, tissus",prevu:"",reel:"",paye:""},{cat:"Mpikabary",note:"Orateur",prevu:"",reel:"",paye:""}]},
+  {section:"Mariage Civil — Fisoratana",color:"#B86870",items:[{cat:"Frais administratifs",note:"Mairie",prevu:"",reel:"",paye:""},{cat:"Tenue",note:"Cérémonie civile",prevu:"",reel:"",paye:""},{cat:"Photographe",note:"Civil",prevu:"",reel:"",paye:""},{cat:"Repas",note:"Après mairie",prevu:"",reel:"",paye:""}]},
+  {section:"Mariage Religieux — Fanamasinana",color:"#C4907E",items:[{cat:"Église / Salle",note:"Décoration, frais",prevu:"",reel:"",paye:""},{cat:"Officiant",note:"Honoraires",prevu:"",reel:"",paye:""},{cat:"Décoration",note:"Fleurs, bougies",prevu:"",reel:"",paye:""}]},
+  {section:"Réception & Grand Jour",color:"#7A9870",items:[{cat:"Salle de réception",note:"Location",prevu:"",reel:"",paye:""},{cat:"Traiteur — Repas",note:"Prix/couvert",prevu:"",reel:"",paye:""},{cat:"Traiteur — Cocktail",note:"Vin d'honneur",prevu:"",reel:"",paye:""},{cat:"Gâteau",note:"Pâtissier",prevu:"",reel:"",paye:""},{cat:"Fleurs & Décoration",note:"Bouquet, tables",prevu:"",reel:"",paye:""},{cat:"Musique & DJ",note:"Animation",prevu:"",reel:"",paye:""}]},
+  {section:"Tenues & Beauté",color:"#C8A070",items:[{cat:"Robe de mariée",note:"Robe + accessoires",prevu:"",reel:"",paye:""},{cat:"Costume du marié",note:"Costume + chaussures",prevu:"",reel:"",paye:""},{cat:"Coiffure & Maquillage",note:"Mariée + cortège",prevu:"",reel:"",paye:""}]},
+  {section:"Prestataires & Médias",color:"#9878A0",items:[{cat:"Photographe",note:"Prestation + album",prevu:"",reel:"",paye:""},{cat:"Vidéaste",note:"Film de mariage",prevu:"",reel:"",paye:""},{cat:"Mpikabary — Mariée",note:"Orateur côté mariée",prevu:"",reel:"",paye:""},{cat:"Mpikabary — Marié",note:"Orateur côté marié",prevu:"",reel:"",paye:""}]},
+  {section:"Logistique & Papeterie",color:"#5888A8",items:[{cat:"Faire-part",note:"Save-the-date, menus",prevu:"",reel:"",paye:""},{cat:"Alliances",note:"Les deux alliances",prevu:"",reel:"",paye:""},{cat:"Transport mariés",note:"Voiture, calèche",prevu:"",reel:"",paye:""},{cat:"Voyage de noces",note:"Vols + hôtel",prevu:"",reel:"",paye:""},{cat:"Divers & Imprévus",note:"Toujours prévoir 10%",prevu:"",reel:"",paye:""}]},
+];
+const VENDOR_CATS=["Salle de réception","Traiteur","Photographe","Vidéaste","Fleuriste","DJ / Groupe musical","Pâtissier / Gâteau","Coiffeur","Maquilleur(se)","Transport mariés","Mpikabary — Mariée","Mpikabary — Marié","Animateur","Décorateur"];
+const mkV=c=>({cat:c,options:[{nom:"",contact:"",tel:"",prix:"",note:""},{nom:"",contact:"",tel:"",prix:"",note:""},{nom:"",contact:"",tel:"",prix:"",note:""}],choisi:"",nomFinal:"",contactFinal:"",telFinal:"",emailFinal:"",montantFinal:"",statutFinal:"À contacter",notesFinal:""});
+const CERE_NAMES=["Vodiondry","Mariage Civil — Fisoratana","Mariage Religieux — Fanamasinana"];
+const CERE_COLORS={"Vodiondry":P.gold,"Mariage Civil — Fisoratana":P.rose,"Mariage Religieux — Fanamasinana":P.blushDk};
+const mkCere=name=>({
+  name,date:"",heure:"",lieu:"",officiant:"",mpikabary:name==="Vodiondry"?"":undefined,budget:"",notes:"",
+  invite_families:Array(8).fill(null).map(()=>({famille:"",nombre:"",side:"Mariée",note:""})),
+  todo:name==="Vodiondry"?[{label:"Fixer la date & lieu",done:false},{label:"Inviter les deux familles",done:false},{label:"Préparer les cadeaux traditionnels",done:false},{label:"Préparer la dot",done:false},{label:"Préparer les tenues traditionnelles",done:false},{label:"Mpikabary — discours familles",done:false},{label:"Réserver traiteur",done:false},{label:"Décoration salle",done:false}]
+    :name==="Mariage Civil — Fisoratana"?[{label:"Rassembler les documents officiels",done:false},{label:"Déposer le dossier à la Mairie",done:false},{label:"Confirmer date & heure",done:false},{label:"Préparer les tenues",done:false},{label:"Choisir les témoins officiels",done:false},{label:"Réserver photographe",done:false},{label:"Organiser le repas après",done:false}]
+    :[{label:"Choisir l'église / lieu",done:false},{label:"Rencontrer l'officiant",done:false},{label:"Préparer lectures & musiques",done:false},{label:"Remettre les documents",done:false},{label:"Répétition cérémonie",done:false},{label:"Préparer les bouquets",done:false},{label:"Confirmer programme",done:false},{label:"Préparer les vœux",done:false}],
+  programme:name==="Vodiondry"?[{m:"Arrivée famille du marié",h:""},{m:"Accueil & présentation",h:""},{m:"Discours du Mpikabary",h:""},{m:"Remise des cadeaux",h:""},{m:"Bénédiction",h:""},{m:"Repas en commun",h:""},{m:"Clôture & photos",h:""}]
+    :name==="Mariage Civil — Fisoratana"?[{m:"Arrivée à la Mairie",h:""},{m:"Entrée des mariés",h:""},{m:"Lecture des engagements",h:""},{m:"Signature du registre",h:""},{m:"Échange des alliances",h:""},{m:"Sortie officielle",h:""},{m:"Photos devant la Mairie",h:""}]
+    :[{m:"Arrivée des invités",h:""},{m:"Procession & entrée",h:""},{m:"Lectures & homélies",h:""},{m:"Échange des vœux",h:""},{m:"Échange des alliances",h:""},{m:"Bénédiction nuptiale",h:""},{m:"Sortie des mariés",h:""},{m:"Séance photo",h:""}],
+});
+const JJ_CHECK=[{label:"Robe & accessoires prêts",done:false},{label:"Alliance dans son écrin",done:false},{label:"Bouquet récupéré",done:false},{label:"Enveloppes prestataires remises",done:false},{label:"Téléphone chargé à 100%",done:false},{label:"Plan de table imprimé",done:false},{label:"Liste photos confiée au photographe",done:false},{label:"Coordonnées prestataires sur papier",done:false},{label:"Bagages voyage de noces prêts",done:false},{label:"Contrats en double exemplaire",done:false}];
+const KIT=[{label:"Épingles à nourrice & fils",done:false},{label:"Ruban adhésif transparent",done:false},{label:"Anti-taches express",done:false},{label:"Mouchoirs blancs",done:false},{label:"Miroir de poche",done:false},{label:"Rouge à lèvres de retouche",done:false},{label:"Anti-transpirant discret",done:false},{label:"Pansements discrets",done:false},{label:"Médicaments basiques",done:false},{label:"Chargeur de téléphone",done:false},{label:"Snack discret",done:false},{label:"Eau en petite bouteille",done:false},{label:"Spray fixant cheveux",done:false},{label:"Fond de teint de retouche",done:false},{label:"Parfum de retouche",done:false},{label:"Chaussures de rechange",done:false},{label:"Stylo pour signer les registres",done:false}];
+const PJJ=[{m:"Réveil",h:""},{m:"Petit-déjeuner",h:""},{m:"Coiffure",h:""},{m:"Maquillage",h:""},{m:"Habillage",h:""},{m:"Photos préparatifs",h:""},{m:"Départ domicile",h:""},{m:"Arrivée cérémonie",h:""},{m:"Cérémonie",h:""},{m:"Sortie des mariés",h:""},{m:"Séance photos",h:""},{m:"Cocktail",h:""},{m:"Entrée en salle",h:""},{m:"Repas",h:""},{m:"Discours",h:""},{m:"Pièce montée",h:""},{m:"Ouverture du bal",h:""},{m:"Fin de soirée",h:""},{m:"Départ mariés",h:""}];
+
+const mkDefaultData=()=>({
+  couple:{bride:"",groom:"",date:"",reception:"",guests:"",budget:"",devise:"Ar",email:"",style:[],story:""},
+  todos:JSON.parse(JSON.stringify(TODOS_DEF)),
+  budget:BUDGET_DEF.map(s=>({...s,items:s.items.map(it=>({...it}))})),
+  vendors:VENDOR_CATS.map(mkV),
+  notes:{general:"",beauty:"",honeymoon:""},
+  ceres:Object.fromEntries(CERE_NAMES.map(n=>[n,mkCere(n)])),
+  guests:Array(20).fill(null).map(()=>({famille:"",side:"Mariée",nombre:1,note:""})),
+  inspi:{notes:"",palette:"Rose Poudré",styles:[],photos:[]},
+  jjCheck:JSON.parse(JSON.stringify(JJ_CHECK)),
+  kit:JSON.parse(JSON.stringify(KIT)),
+  pjj:JSON.parse(JSON.stringify(PJJ)),
+  voeux:{mariee:"",marie:""},
+  urg:[{role:"Coordinateur(trice)",nom:"",tel:""},{role:"Photographe",nom:"",tel:""},{role:"Traiteur",nom:"",tel:""},{role:"DJ / Musicien",nom:"",tel:""},{role:"Fleuriste",nom:"",tel:""},{role:"Transport mariés",nom:"",tel:""},{role:"Mpikabary",nom:"",tel:""},{role:"Témoin Mariée",nom:"",tel:""},{role:"Témoin Marié",nom:"",tel:""},{role:"Hôtel / Lieu",nom:"",tel:""}],
+});
+
+// ══════════════════════════════════════════════════════════════════════════
+// AUTH SCREEN
+// ══════════════════════════════════════════════════════════════════════════
+function AuthScreen({onAuth}){
+  const [mode,setMode]=useState("login"); // login | signup | forgot
+  const [email,setEmail]=useState("");
+  const [pwd,setPwd]=useState("");
+  const [loading,setLoading]=useState(false);
+  const [msg,setMsg]=useState(null); // {type:"error"|"success", text}
+
+  const submit=async()=>{
+    if(!email||(!pwd&&mode!=="forgot")){setMsg({type:"error",text:"Veuillez remplir tous les champs."});return;}
+    setLoading(true);setMsg(null);
+    try{
+      if(mode==="login"){
+        const {error}=await sb.auth.signInWithPassword({email,password:pwd});
+        if(error)throw error;
+        onAuth();
+      }else if(mode==="signup"){
+        if(pwd.length<6){setMsg({type:"error",text:"Mot de passe trop court (6 caractères minimum)."});setLoading(false);return;}
+        const {error}=await sb.auth.signUp({email,password:pwd});
+        if(error)throw error;
+        setMsg({type:"success",text:"Compte créé ! Vérifiez votre email pour confirmer, puis connectez-vous."});
+        setMode("login");
+      }else{
+        const {error}=await sb.auth.resetPasswordForEmail(email);
+        if(error)throw error;
+        setMsg({type:"success",text:"Email de réinitialisation envoyé !"});
+      }
+    }catch(e){
+      const msgs={"Invalid login credentials":"Email ou mot de passe incorrect.","User already registered":"Cet email est déjà utilisé.","Email not confirmed":"Confirmez votre email avant de vous connecter."};
+      setMsg({type:"error",text:msgs[e.message]||e.message});
+    }
+    setLoading(false);
+  };
+
+  const inputStyle={width:"100%",boxSizing:"border-box",background:"rgba(255,252,248,0.6)",border:"1px solid rgba(210,185,170,0.5)",borderRadius:12,padding:"14px 18px",fontFamily:F.body,fontWeight:300,fontSize:14,color:P.dark,marginBottom:12,backdropFilter:"blur(4px)"};
+
+  return(
+    <div style={{minHeight:"100vh",background:"linear-gradient(165deg,#F0E8DE 0%,#EDE0D4 35%,#E8D8CC 65%,#F0E4D8 100%)",display:"flex",alignItems:"center",justifyContent:"center",padding:"40px 24px",position:"relative",overflow:"hidden"}}>
+      <WatercolorBg/>
+      <div style={{position:"absolute",top:0,right:0,pointerEvents:"none"}}><FloralCorner size={240} color="#A87858" opacity={0.2}/></div>
+      <div style={{position:"absolute",bottom:0,left:0,pointerEvents:"none",transform:"rotate(180deg)"}}><FloralCorner size={180} color="#B86870" opacity={0.15}/></div>
+
+      <div style={{position:"relative",zIndex:2,width:"100%",maxWidth:400}}>
+        {/* Titre */}
+        <div className="fu1" style={{textAlign:"center",marginBottom:36}}>
+          <div style={{fontFamily:F.script,fontStyle:"italic",fontSize:52,color:P.dark,lineHeight:0.95}}>Andro iray</div>
+          <div style={{fontFamily:F.script,fontStyle:"italic",fontSize:64,color:P.gold,lineHeight:0.9}}>toa zato</div>
+          <div style={{marginTop:14}}><OilStroke color={P.blushMd} opacity={0.6} height={5}/></div>
+          <div style={{fontFamily:F.body,fontWeight:300,fontSize:10,letterSpacing:2.5,color:P.mid,marginTop:10,textTransform:"uppercase"}}>Mon carnet de mariage</div>
+        </div>
+
+        {/* Card auth */}
+        <div className="fu2" style={{background:"rgba(255,252,248,0.78)",backdropFilter:"blur(16px)",WebkitBackdropFilter:"blur(16px)",borderRadius:20,border:"1px solid rgba(220,200,185,0.5)",boxShadow:"0 8px 40px rgba(160,120,80,0.12)",padding:"32px 32px 28px"}}>
+          {/* Tabs */}
+          <div style={{display:"flex",marginBottom:24,borderBottom:`1px solid ${P.line}`}}>
+            {mode!=="forgot"&&[{id:"login",l:"Se connecter"},{id:"signup",l:"Créer un compte"}].map(t=>(
+              <button key={t.id} onClick={()=>{setMode(t.id);setMsg(null);}} style={{flex:1,background:"none",border:"none",borderBottom:`2px solid ${mode===t.id?P.rose:"transparent"}`,padding:"10px 0 12px",fontFamily:F.body,fontWeight:mode===t.id?400:300,fontSize:13,color:mode===t.id?P.rose:P.mid,cursor:"pointer",transition:"all .2s"}}>{t.l}</button>
+            ))}
+            {mode==="forgot"&&<div style={{fontFamily:F.script,fontStyle:"italic",fontSize:18,color:P.dark,paddingBottom:12}}>Mot de passe oublié</div>}
+          </div>
+
+          {/* Message */}
+          {msg&&(
+            <div style={{background:msg.type==="error"?"rgba(184,104,112,0.12)":"rgba(100,160,100,0.12)",border:`1px solid ${msg.type==="error"?"rgba(184,104,112,0.3)":"rgba(100,160,100,0.3)"}`,borderRadius:10,padding:"10px 14px",marginBottom:16,fontFamily:F.body,fontWeight:300,fontSize:12,color:msg.type==="error"?P.roseDk:"#3A7A3A"}}>
+              {msg.text}
+            </div>
+          )}
+
+          {/* Inputs */}
+          <input type="email" value={email} onChange={e=>setEmail(e.target.value)} placeholder="Email" style={inputStyle} onKeyDown={e=>e.key==="Enter"&&submit()}/>
+          {mode!=="forgot"&&<input type="password" value={pwd} onChange={e=>setPwd(e.target.value)} placeholder="Mot de passe" style={inputStyle} onKeyDown={e=>e.key==="Enter"&&submit()}/>}
+
+          {/* Submit */}
+          <button onClick={submit} disabled={loading} style={{width:"100%",background:`linear-gradient(135deg,${P.gold},#A07040)`,color:"rgba(255,252,245,0.96)",border:"none",borderRadius:50,padding:"15px",cursor:loading?"not-allowed":"pointer",fontFamily:F.body,fontWeight:300,fontSize:12,letterSpacing:3,textTransform:"uppercase",boxShadow:"0 6px 24px rgba(160,110,50,0.28)",marginTop:4,opacity:loading?0.8:1,display:"flex",alignItems:"center",justifyContent:"center",gap:10}}>
+            {loading&&<span className="spinner"/>}
+            {mode==="login"?"Se connecter":mode==="signup"?"Créer mon compte":"Envoyer le lien"}
+          </button>
+
+          {/* Forgot link */}
+          {mode==="login"&&<div style={{textAlign:"center",marginTop:14}}>
+            <span onClick={()=>{setMode("forgot");setMsg(null);}} style={{fontFamily:F.body,fontWeight:300,fontSize:11,color:P.mid,cursor:"pointer",textDecoration:"underline",textDecorationColor:P.line}}>Mot de passe oublié ?</span>
+          </div>}
+          {mode==="forgot"&&<div style={{textAlign:"center",marginTop:14}}>
+            <span onClick={()=>{setMode("login");setMsg(null);}} style={{fontFamily:F.body,fontWeight:300,fontSize:11,color:P.mid,cursor:"pointer",textDecoration:"underline",textDecorationColor:P.line}}>← Retour à la connexion</span>
+          </div>}
+        </div>
+
+        <div className="fu2" style={{textAlign:"center",marginTop:18,fontFamily:F.body,fontWeight:300,fontSize:10,color:P.mid,letterSpacing:1.5,opacity:0.6}}>
+          Vodiondry · Fisoratana · Fanamasinana
+        </div>
+      </div>
+    </div>
+  );
+}
+
+
+
+// ── Install Guide Modal ───────────────────────────────────────────────────
+function InstallGuide({onClose}) {
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+  const isAndroid = /Android/.test(navigator.userAgent);
+  const isSafari = /Safari/.test(navigator.userAgent) && !/Chrome/.test(navigator.userAgent);
+
+  return (
+    <div style={{position:"fixed",inset:0,zIndex:9999,display:"flex",alignItems:"flex-end",justifyContent:"center",background:"rgba(0,0,0,0.4)",backdropFilter:"blur(4px)"}} onClick={onClose}>
+      <div onClick={e=>e.stopPropagation()} style={{width:"100%",maxWidth:480,background:"rgba(255,252,248,0.98)",backdropFilter:"blur(20px)",borderRadius:"24px 24px 0 0",padding:"28px 28px 40px",boxShadow:"0 -8px 40px rgba(0,0,0,0.15)"}}>
+        <div style={{width:40,height:4,background:P.line,borderRadius:2,margin:"0 auto 20px"}}/>
+        <div style={{fontFamily:F.script,fontStyle:"italic",fontSize:24,color:P.dark,marginBottom:4}}>Installer l'app</div>
+        <OilStroke color={P.blush} opacity={0.5} height={4}/>
+        <div style={{...BT(12),color:P.mid,marginTop:10,marginBottom:20}}>Ajoutez Andro iray sur votre écran d'accueil pour un accès rapide, comme une vraie app !</div>
+
+        {isIOS && (
+          <div>
+            <div style={{...BT(11),color:P.mid,marginBottom:14,fontWeight:400}}>Sur iPhone / iPad :</div>
+            {[
+              {num:"1", icon:"↑", text:"Appuyez sur le bouton Partager", sub:"Le carré avec une flèche en bas de Safari"},
+              {num:"2", icon:"＋", text:"Appuyez sur "Sur l'écran d'accueil"", sub:"Faites défiler vers le bas dans le menu"},
+              {num:"3", icon:"✓", text:"Appuyez sur "Ajouter"", sub:"L'app apparaît sur votre écran d'accueil !"},
+            ].map(s=>(
+              <div key={s.num} style={{display:"flex",gap:14,alignItems:"flex-start",marginBottom:14,padding:"12px 16px",background:"rgba(237,213,204,0.25)",borderRadius:12}}>
+                <div style={{width:32,height:32,borderRadius:"50%",background:`linear-gradient(135deg,${P.gold},#A07040)`,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
+                  <span style={{color:"white",fontSize:14}}>{s.icon}</span>
+                </div>
+                <div>
+                  <div style={{fontFamily:F.body,fontWeight:400,fontSize:13,color:P.dark}}>{s.text}</div>
+                  <div style={{...BT(11),color:P.mid}}>{s.sub}</div>
+                </div>
+              </div>
+            ))}
+            <div style={{background:"rgba(237,213,204,0.3)",borderRadius:12,padding:"10px 14px",marginTop:8}}>
+              <div style={{...BT(11),color:P.mid,textAlign:"center"}}>⚠️ Utilisez <strong>Safari</strong> — Chrome sur iPhone ne supporte pas l'installation</div>
+            </div>
+          </div>
+        )}
+
+        {isAndroid && (
+          <div>
+            <div style={{...BT(11),color:P.mid,marginBottom:14,fontWeight:400}}>Sur Android :</div>
+            {[
+              {num:"1", icon:"⋮", text:"Appuyez sur les 3 points en haut à droite", sub:"Dans Chrome"},
+              {num:"2", icon:"📲", text:""Ajouter à l'écran d'accueil"", sub:"Ou attendez la bannière automatique en bas"},
+              {num:"3", icon:"✓", text:"Appuyez sur "Ajouter"", sub:"L'app s'installe comme une vraie app !"},
+            ].map(s=>(
+              <div key={s.num} style={{display:"flex",gap:14,alignItems:"flex-start",marginBottom:14,padding:"12px 16px",background:"rgba(237,213,204,0.25)",borderRadius:12}}>
+                <div style={{width:32,height:32,borderRadius:"50%",background:`linear-gradient(135deg,${P.gold},#A07040)`,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
+                  <span style={{color:"white",fontSize:14}}>{s.icon}</span>
+                </div>
+                <div>
+                  <div style={{fontFamily:F.body,fontWeight:400,fontSize:13,color:P.dark}}>{s.text}</div>
+                  <div style={{...BT(11),color:P.mid}}>{s.sub}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {!isIOS && !isAndroid && (
+          <div>
+            <div style={{...BT(11),color:P.mid,marginBottom:14,fontWeight:400}}>Sur ordinateur (Chrome) :</div>
+            {[
+              {icon:"⊕", text:"Icône d'installation dans la barre d'adresse", sub:"Tout à droite, un petit écran avec une flèche"},
+              {icon:"⋮", text:"Ou menu 3 points → "Installer Andro iray..."", sub:"Dans le menu principal de Chrome"},
+            ].map((s,i)=>(
+              <div key={i} style={{display:"flex",gap:14,alignItems:"flex-start",marginBottom:14,padding:"12px 16px",background:"rgba(237,213,204,0.25)",borderRadius:12}}>
+                <div style={{width:32,height:32,borderRadius:"50%",background:`linear-gradient(135deg,${P.gold},#A07040)`,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
+                  <span style={{color:"white",fontSize:14}}>{s.icon}</span>
+                </div>
+                <div>
+                  <div style={{fontFamily:F.body,fontWeight:400,fontSize:13,color:P.dark}}>{s.text}</div>
+                  <div style={{...BT(11),color:P.mid}}>{s.sub}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        <button onClick={onClose} style={{width:"100%",background:`linear-gradient(135deg,${P.rose},${P.roseDk})`,color:"white",border:"none",borderRadius:50,padding:"14px",cursor:"pointer",fontFamily:F.body,fontWeight:300,fontSize:12,letterSpacing:2,textTransform:"uppercase",marginTop:8}}>
+          Compris ♡
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function InstallButton() {
+  const [showGuide, setShowGuide] = React.useState(false);
+  const [prompt, setPrompt] = React.useState(null);
+  const [installed, setInstalled] = React.useState(false);
+
+  React.useEffect(() => {
+    window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); setPrompt(e); });
+    window.addEventListener('appinstalled', () => setInstalled(true));
+    if (window.matchMedia('(display-mode: standalone)').matches) setInstalled(true);
+  }, []);
+
+  if (installed) return null;
+
+  const handleClick = async () => {
+    if (prompt) {
+      prompt.prompt();
+      const { outcome } = await prompt.userChoice;
+      if (outcome === 'accepted') setInstalled(true);
+      setPrompt(null);
+    } else {
+      setShowGuide(true);
+    }
+  };
+
+  return (
+    <>
+      <button onClick={handleClick} style={{background:`linear-gradient(135deg,${P.gold},#A07040)`,color:"white",border:"none",borderRadius:30,padding:"6px 14px",fontFamily:F.body,fontSize:10,cursor:"pointer",letterSpacing:1,whiteSpace:"nowrap",boxShadow:"0 2px 10px rgba(160,110,50,0.25)"}}>
+        📲 Installer
+      </button>
+      {showGuide && <InstallGuide onClose={()=>setShowGuide(false)}/>}
+    </>
+  );
+}
+// ── Notification Button ───────────────────────────────────────────────────
+function NotifButton({weddingDate, coupleName}) {
+  const [status, setStatus] = React.useState(
+    typeof Notification !== 'undefined' ? Notification.permission : 'unsupported'
+  );
+  const [done, setDone] = React.useState(false);
+
+  const activate = async () => {
+    const perm = await window.AndroReminders?.requestPermission();
+    setStatus(perm);
+    if (perm === 'granted' && weddingDate) {
+      await window.AndroReminders?.scheduleWeddingAlarm(weddingDate, coupleName);
+      window.AndroReminders?.startPolling();
+      setDone(true);
+      setTimeout(() => setDone(false), 3000);
+    }
+  };
+
+  if (status === 'unsupported') return null;
+
+  return (
+    <button onClick={activate} style={{
+      background: status === 'granted' ? 'rgba(100,160,100,0.15)' : 'transparent',
+      color: status === 'granted' ? '#3A7A3A' : P.mid,
+      border: `1px solid ${status === 'granted' ? 'rgba(100,160,100,0.4)' : P.line}`,
+      borderRadius: 30, padding: '6px 14px', fontFamily: F.body,
+      fontSize: 10, cursor: 'pointer', whiteSpace: 'nowrap'
+    }} title={status === 'granted' ? 'Rappels activés' : 'Activer les rappels'}>
+      {done ? '✓ Rappels activés !' : status === 'granted' ? '🔔 Rappels ON' : '🔕 Rappels'}
+    </button>
+  );
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+// MAIN APP (authenticated)
+// ══════════════════════════════════════════════════════════════════════════
+function MainApp({user,onSignOut}){
+  const [tab,setTab]=useState("accueil");
+  const [cTab,setCTab]=useState("Vodiondry");
+  const [vTab,setVTab]=useState("compare");
+  const [jTab,setJTab]=useState("countdown");
+  const [data,setData]=useState(null);
+  const [saving,setSaving]=useState(false);
+  const [saveMsg,setSaveMsg]=useState("");
+  const saveTimer=useRef(null);
+
+  // Load data from Supabase on mount
+  useEffect(()=>{
+    const load=async()=>{
+      const {data:rows}=await sb.from("planners").select("data").eq("user_id",user.id).single();
+      if(rows&&rows.data){
+        setData(rows.data);
+      }else{
+        setData(mkDefaultData());
+      }
+    };
+    load();
+  },[user.id]);
+
+  // Auto-save to Supabase 2s after last change
+  const save=useCallback(async(d)=>{
+    setSaving(true);
+    await sb.from("planners").upsert({user_id:user.id,data:d,updated_at:new Date().toISOString()},{onConflict:"user_id"});
+    setSaving(false);
+    setSaveMsg("Sauvegardé ✓");
+    setTimeout(()=>setSaveMsg(""),2000);
+  },[user.id]);
+
+  const upd=(fn)=>{
+    setData(prev=>{
+      const next=fn(prev);
+      clearTimeout(saveTimer.current);
+      saveTimer.current=setTimeout(()=>save(next),1500);
+      return next;
+    });
+  };
+
+  if(!data)return(
+    <div style={{minHeight:"100vh",display:"flex",alignItems:"center",justifyContent:"center",background:"linear-gradient(165deg,#F0E8DE,#EDE0D4)"}}>
+      <WatercolorBg/>
+      <div style={{position:"relative",zIndex:1,textAlign:"center"}}>
+        <span className="spinner" style={{width:36,height:36,borderWidth:3,borderColor:"rgba(184,137,90,0.3)",borderTopColor:P.gold}}/>
+        <div style={{fontFamily:F.script,fontStyle:"italic",fontSize:16,color:P.mid,marginTop:16}}>Chargement de votre planner...</div>
+      </div>
+    </div>
+  );
+
+  const {couple,todos,budget:bSec,vendors,notes,ceres,guests,inspi,jjCheck,kit,pjj,voeux,urg}=data;
+  const D=couple.devise||"Ar";
+  const sC=(k,v)=>upd(p=>({...p,couple:{...p.couple,[k]:v}}));
+  const gT=f=>bSec.reduce((s,sec)=>s+sec.items.reduce((ss,it)=>ss+(parseFloat(it[f])||0),0),0);
+  const sBi=(si,ii,f,v)=>upd(p=>{const b=p.budget.map(s=>({...s,items:s.items.map(it=>({...it}))}));b[si].items[ii][f]=v;return{...p,budget:b};});
+  const tdDone=Object.values(todos).flat().filter(t=>t.done).length;
+  const tdTotal=Object.values(todos).flat().length;
+  const togTd=(sec,idx)=>upd(p=>({...p,todos:{...p.todos,[sec]:p.todos[sec].map((t,i)=>i===idx?{...t,done:!t.done}:t)}}));
+  const updVO=(vi,oi,f,v)=>upd(p=>{const vs=[...p.vendors];vs[vi]={...vs[vi],options:vs[vi].options.map((o,i)=>i===oi?{...o,[f]:v}:o)};return{...p,vendors:vs};});
+  const updVF=(vi,f,v)=>upd(p=>{const vs=[...p.vendors];vs[vi]={...vs[vi],[f]:v};return{...p,vendors:vs};});
+  const updG=(i,f,v)=>upd(p=>{const gs=[...p.guests];gs[i]={...gs[i],[f]:v};return{...p,guests:gs};});
+  const updC=(name,f,v)=>upd(p=>({...p,ceres:{...p.ceres,[name]:{...p.ceres[name],[f]:v}}}));
+  const togCT=(name,idx)=>upd(p=>({...p,ceres:{...p.ceres,[name]:{...p.ceres[name],todo:p.ceres[name].todo.map((t,i)=>i===idx?{...t,done:!t.done}:t)}}}));
+  const updCP=(name,idx,v)=>upd(p=>({...p,ceres:{...p.ceres,[name]:{...p.ceres[name],programme:p.ceres[name].programme.map((r,i)=>i===idx?{...r,h:v}:r)}}}));
+  const updCF=(name,fi,field,v)=>upd(p=>({...p,ceres:{...p.ceres,[name]:{...p.ceres[name],invite_families:p.ceres[name].invite_families.map((f,i)=>i===fi?{...f,[field]:v}:f)}}}));
+  const updU=(i,f,v)=>upd(p=>{const u=[...p.urg];u[i]={...u[i],[f]:v};return{...p,urg:u};});
+  const addPhoto=e=>{
+    const files=Array.from(e.target.files);
+    files.forEach(file=>{
+      const reader=new FileReader();
+      reader.onload=ev=>upd(p=>({...p,inspi:{...p.inspi,photos:[...p.inspi.photos,{url:ev.target.result,name:file.name,note:""}]}}));
+      reader.readAsDataURL(file);
+    });
+  };
+
+  const TABS=[{id:"accueil",l:"✦ Accueil"},{id:"couple",l:"♡ Nous deux"},{id:"ceremonies",l:"❀ Cérémonies"},{id:"todo",l:"✓ To-do"},{id:"budget",l:"◈ Budget"},{id:"invites",l:"◎ Invités"},{id:"prestataires",l:"⬡ Prestataires"},{id:"style",l:"✿ Style"},{id:"jourj",l:"☀ Jour J"},{id:"notes",l:"✎ Notes"}];
+  const JJT=[{id:"countdown",l:"⏳ Compte à rebours"},{id:"planning",l:"📋 Planning"},{id:"contacts",l:"📞 Contacts urgents"},{id:"checklist",l:"✓ Vérification"},{id:"voeux",l:"♡ Vœux"},{id:"kit",l:"💼 Kit survie"}];
+  const btnTab=(id,cur,set,l)=><button key={id} onClick={()=>set(id)} style={{background:"none",border:"none",borderBottom:`2px solid ${cur===id?P.rose:"transparent"}`,padding:"14px 9px 12px",fontFamily:F.body,fontWeight:cur===id?400:300,fontSize:11,color:cur===id?P.rose:P.mid,cursor:"pointer",whiteSpace:"nowrap",transition:"all .2s"}}>{l}</button>;
+  const subBtn=(id,cur,set,l)=><button key={id} onClick={()=>set(id)} style={{background:cur===id?`linear-gradient(135deg,${P.rose},${P.roseDk})`:"rgba(255,252,248,0.6)",color:cur===id?P.white:P.mid,border:`1px solid ${cur===id?P.rose:P.line}`,borderRadius:40,padding:"9px 16px",cursor:"pointer",fontFamily:F.body,fontWeight:300,fontSize:11,transition:"all .2s",whiteSpace:"nowrap",backdropFilter:"blur(6px)"}}>{l}</button>;
+
+  return(
+    <div style={{minHeight:"100vh",background:"linear-gradient(165deg,#F0E8DE 0%,#EDE0D4 40%,#E8D8CC 70%,#EFE3D7 100%)",fontFamily:F.body,position:"relative"}}>
+      <WatercolorBg/>
+
+      {/* NAV */}
+      <div className="no-print" style={{position:"sticky",top:0,zIndex:200,background:"rgba(245,239,232,0.85)",backdropFilter:"blur(16px)",WebkitBackdropFilter:"blur(16px)",borderBottom:"1px solid rgba(210,190,175,0.4)",boxShadow:"0 1px 16px rgba(160,120,80,0.08)"}}>
+        <div style={{maxWidth:1000,margin:"0 auto",padding:"0 16px",display:"flex",alignItems:"center",gap:0,overflowX:"auto"}}>
+          <div style={{marginRight:16,whiteSpace:"nowrap",flexShrink:0,padding:"10px 0",lineHeight:1.1}}>
+            <div style={{fontFamily:F.script,fontStyle:"italic",fontSize:10,color:P.gold}}>Andro iray</div>
+            <div style={{fontFamily:F.script,fontStyle:"italic",fontSize:16,color:P.rose,marginTop:-2}}>toa zato</div>
+          </div>
+          {TABS.map(t=>btnTab(t.id,tab,setTab,t.l))}
+          <div style={{marginLeft:"auto",display:"flex",alignItems:"center",gap:8,flexShrink:0}}>
+            {saveMsg&&<span style={{fontFamily:F.body,fontWeight:300,fontSize:10,color:"#6A9A6A",letterSpacing:1}}>{saveMsg}</span>}
+            {saving&&<span className="spinner" style={{width:14,height:14,borderWidth:2,borderColor:"rgba(184,137,90,0.3)",borderTopColor:P.gold}}/>}
+            <button onClick={()=>window.print()} style={{background:"transparent",color:P.mid,border:`1px solid ${P.line}`,borderRadius:30,padding:"6px 14px",fontFamily:F.body,fontSize:10,letterSpacing:1,cursor:"pointer"}}>🖨</button>
+            <InstallButton/>
+            <NotifButton weddingDate={couple?.date} coupleName={couple?.bride&&couple?.groom?`${couple.bride} \& ${couple.groom}`:""}/>
+            <button onClick={onSignOut} style={{background:"transparent",color:P.mid,border:`1px solid ${P.line}`,borderRadius:30,padding:"6px 14px",fontFamily:F.body,fontSize:10,cursor:"pointer"}} title="Se déconnecter">↩ Sortir</button>
+          </div>
+        </div>
+      </div>
+
+      <div style={{maxWidth:900,margin:"0 auto",padding:"32px 20px 80px",position:"relative",zIndex:1}}>
+
+        {/* ACCUEIL */}
+        {tab==="accueil"&&(
+          <div>
+            <Card style={{background:"rgba(255,252,248,0.65)"}}>
+              <CI>
+                <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",flexWrap:"wrap",gap:16}}>
+                  <div>
+                    <div style={{...ST(32),color:P.dark}}>{couple.bride&&couple.groom?`${couple.bride} & ${couple.groom}`:"Votre histoire commence ici ♡"}</div>
+                    {couple.date&&<div style={{...BT(13),marginTop:8,color:P.rose}}>♡ {new Date(couple.date).toLocaleDateString("fr-FR",{day:"numeric",month:"long",year:"numeric"})}</div>}
+                    {couple.reception&&<div style={{...BT(12),marginTop:4,color:P.mid}}>📍 {couple.reception}</div>}
+                  </div>
+                  <div style={{textAlign:"right"}}>
+                    <div style={{...BT(9),textTransform:"uppercase",letterSpacing:1.5,color:P.mid}}>Budget total prévu</div>
+                    <div style={{fontFamily:F.script,fontStyle:"italic",fontSize:24,color:P.gold}}>{gT("prevu").toLocaleString("fr-FR")} {D}</div>
+                  </div>
+                </div>
+              </CI>
+            </Card>
+            <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:14,marginBottom:18}}>
+              {[{l:"Tâches complétées",v:`${tdDone} / ${tdTotal}`,pct:tdTotal?tdDone/tdTotal:0,c:P.rose},{l:"Budget prévu",v:`${gT("prevu").toLocaleString("fr-FR")} ${D}`,pct:couple.budget?Math.min(gT("prevu")/parseFloat(couple.budget||1),1):0,c:P.gold},{l:"Déjà payé",v:`${gT("paye").toLocaleString("fr-FR")} ${D}`,pct:gT("reel")?Math.min(gT("paye")/gT("reel"),1):0,c:P.blushDk}].map(s=>(
+                <div key={s.l} style={{background:"rgba(255,252,248,0.6)",backdropFilter:"blur(8px)",border:"1px solid rgba(220,200,185,0.4)",borderRadius:16,padding:"18px 22px"}}>
+                  <div style={{...BT(9),textTransform:"uppercase",letterSpacing:2,color:P.mid,marginBottom:5}}>{s.l}</div>
+                  <div style={{fontFamily:F.script,fontStyle:"italic",fontSize:20,color:s.c}}>{s.v}</div>
+                  <div style={{marginTop:10,height:3,background:"rgba(210,185,170,0.25)",borderRadius:2,overflow:"hidden"}}>
+                    <div style={{width:`${s.pct*100}%`,height:"100%",background:`linear-gradient(to right,${s.c}66,${s.c})`,borderRadius:2,transition:"width .6s"}}/>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:14}}>
+              {CERE_NAMES.map(name=>{
+                const cer=ceres[name];const done=cer.todo.filter(t=>t.done).length;const color=CERE_COLORS[name];
+                return(
+                  <div key={name} onClick={()=>{setTab("ceremonies");setCTab(name);}} style={{background:"rgba(255,252,248,0.55)",backdropFilter:"blur(8px)",border:"1px solid rgba(220,200,185,0.4)",borderRadius:16,padding:"18px 20px",cursor:"pointer",transition:"all .2s"}}>
+                    <div style={{...ST(13),color:P.dark,marginBottom:6}}>{name}</div>
+                    {cer.date&&<div style={{...BT(10),color:P.mid,marginBottom:6}}>📅 {new Date(cer.date).toLocaleDateString("fr-FR",{day:"numeric",month:"short"})}</div>}
+                    <div style={{display:"flex",alignItems:"center",gap:8,marginTop:8}}>
+                      <div style={{flex:1,height:3,background:"rgba(210,185,170,0.3)",borderRadius:2}}><div style={{width:`${cer.todo.length?done/cer.todo.length*100:0}%`,height:"100%",background:`linear-gradient(to right,${color}66,${color})`,borderRadius:2}}/></div>
+                      <div style={{...BT(10),color:P.mid}}>{done}/{cer.todo.length}</div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* NOUS DEUX */}
+        {tab==="couple"&&(
+          <div>
+            <Card><CI>
+              <SHead script="Notre histoire" display="Les deux mariés"/>
+              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"0 32px"}}>
+                <IL label="Prénom de la mariée" value={couple.bride} onChange={v=>sC("bride",v)}/>
+                <IL label="Prénom du marié" value={couple.groom} onChange={v=>sC("groom",v)}/>
+                <IL label="Date du mariage" value={couple.date} onChange={v=>sC("date",v)} type="date"/>
+                <IL label="Lieu de la réception" value={couple.reception} onChange={v=>sC("reception",v)} placeholder="Nom du lieu..."/>
+                <IL label="Nombre de familles invitées" value={couple.guests} onChange={v=>sC("guests",v)} type="number"/>
+                <div>
+                  <Lbl c="Devise"/>
+                  <select value={couple.devise} onChange={e=>sC("devise",e.target.value)} style={{width:"100%",border:"none",borderBottom:`1.5px solid ${P.line}`,background:"transparent",padding:"6px 0",fontFamily:F.script,fontStyle:"italic",fontSize:15,color:P.dark,marginBottom:16}}>
+                    {["Ar","€","$","£"].map(d=><option key={d}>{d}</option>)}
+                  </select>
+                </div>
+                <IL label="Budget global" value={couple.budget} onChange={v=>sC("budget",v)} type="number"/>
+                <IL label="Email" value={couple.email} onChange={v=>sC("email",v)} type="email"/>
+              </div>
+              <TA label="Notre histoire d'amour" value={couple.story} onChange={v=>sC("story",v)} rows={4} placeholder="Il était une fois..."/>
+            </CI></Card>
+            <Card><CI>
+              <SHead script="Style du mariage" color={P.goldLt}/>
+              <div style={{display:"flex",flexWrap:"wrap"}}>
+                {STYLES_LIST.map(s=><Tg key={s} label={s} active={couple.style.includes(s)} onClick={()=>sC("style",couple.style.includes(s)?couple.style.filter(x=>x!==s):[...couple.style,s])}/>)}
+              </div>
+            </CI></Card>
+          </div>
+        )}
+
+        {/* CÉRÉMONIES */}
+        {tab==="ceremonies"&&(
+          <div>
+            <div className="no-print" style={{display:"flex",gap:8,marginBottom:20,flexWrap:"wrap"}}>
+              {CERE_NAMES.map(n=><button key={n} onClick={()=>setCTab(n)} style={{background:cTab===n?`linear-gradient(135deg,${P.rose},${P.roseDk})`:"rgba(255,252,248,0.55)",color:cTab===n?P.white:P.mid,border:`1px solid ${cTab===n?P.rose:P.line}`,borderRadius:40,padding:"10px 18px",cursor:"pointer",fontFamily:F.body,fontWeight:300,fontSize:11,transition:"all .2s",backdropFilter:"blur(6px)"}}>{n}</button>)}
+            </div>
+            {CERE_NAMES.filter(n=>n===cTab).map(name=>{
+              const c=CERE_COLORS[name];
+              return(
+                <div key={name}>
+                  <Card><CI>
+                    <SHead script={name} display="Informations générales" color={`${c}88`}/>
+                    <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"0 32px"}}>
+                      <IL label="Date" value={ceres[name].date} onChange={v=>updC(name,"date",v)} type="date"/>
+                      <IL label="Heure" value={ceres[name].heure} onChange={v=>updC(name,"heure",v)} placeholder="10 h 00"/>
+                      <IL label="Lieu" value={ceres[name].lieu} onChange={v=>updC(name,"lieu",v)}/>
+                      <IL label="Officiant / Organisateur" value={ceres[name].officiant} onChange={v=>updC(name,"officiant",v)}/>
+                      {name==="Vodiondry"&&<IL label="Mpikabary (orateur)" value={ceres[name].mpikabary||""} onChange={v=>updC(name,"mpikabary",v)}/>}
+                      <IL label={`Budget (${D})`} value={ceres[name].budget} onChange={v=>updC(name,"budget",v)} type="number"/>
+                    </div>
+                  </CI></Card>
+                  <Card><CI>
+                    <SHead script="Checklist" color={`${c}66`}/>
+                    {ceres[name].todo.map((t,i)=><BC key={i} label={t.label} checked={t.done} onChange={()=>togCT(name,i)}/>)}
+                  </CI></Card>
+                  <Card><CI>
+                    <SHead script="Programme" color={`${c}55`}/>
+                    {ceres[name].programme.map((row,i)=>(
+                      <div key={i} style={{display:"flex",alignItems:"center",gap:12,marginBottom:9,padding:"6px 0",borderBottom:`1px solid rgba(220,200,185,0.25)`}}>
+                        <div style={{width:7,height:7,borderRadius:"50%",background:`${c}88`,flexShrink:0}}/>
+                        <div style={{...BT(13),color:P.dark,flex:1}}>{row.m}</div>
+                        <input value={row.h} onChange={e=>updCP(name,i,e.target.value)} placeholder="__ h __"
+                          style={{width:70,border:"none",borderBottom:`1px solid ${P.line}`,background:"transparent",padding:"2px 0",fontFamily:F.script,fontStyle:"italic",fontSize:14,color:P.rose,outline:"none",textAlign:"center"}}/>
+                      </div>
+                    ))}
+                  </CI></Card>
+                  <Card><CI>
+                    <SHead script="Familles invitées" color={P.goldLt}/>
+                    <div style={{display:"grid",gridTemplateColumns:"2fr 1fr 80px",gap:"0 12px",marginBottom:8}}>
+                      <Lbl c="Famille"/><Lbl c="Côté"/><Lbl c="Nombre"/>
+                    </div>
+                    {ceres[name].invite_families.map((fam,fi)=>(
+                      <div key={fi} style={{display:"grid",gridTemplateColumns:"2fr 1fr 80px",gap:"0 12px",marginBottom:10,borderBottom:`1px solid rgba(220,200,185,0.2)`,paddingBottom:6}}>
+                        <input value={fam.famille} onChange={e=>updCF(name,fi,"famille",e.target.value)} placeholder={`Famille ${fi+1}...`} style={{border:"none",borderBottom:`1px solid ${P.line}`,background:"transparent",padding:"4px 0",fontFamily:F.script,fontStyle:"italic",fontSize:14,color:P.dark,outline:"none"}}/>
+                        <select value={fam.side} onChange={e=>updCF(name,fi,"side",e.target.value)} style={{border:"none",borderBottom:`1px solid ${P.line}`,background:"transparent",fontFamily:F.body,fontSize:12,color:P.mid,outline:"none"}}>
+                          <option>Mariée</option><option>Marié</option><option>Les deux</option>
+                        </select>
+                        <input type="number" value={fam.nombre} onChange={e=>updCF(name,fi,"nombre",e.target.value)} style={{border:"none",borderBottom:`1px solid ${P.line}`,background:"transparent",padding:"4px 0",fontFamily:F.body,fontSize:13,color:P.rose,outline:"none",textAlign:"center"}}/>
+                      </div>
+                    ))}
+                  </CI></Card>
+                  <Card><CI><SHead script="Notes" color={P.blush}/><TA value={ceres[name].notes} onChange={v=>updC(name,"notes",v)} rows={4} placeholder="Détails, souhaits, idées..."/></CI></Card>
+                </div>
+              );
+            })}
+          </div>
+        )}
+
+        {/* TODO */}
+        {tab==="todo"&&(
+          <div>
+            <BB style={{marginBottom:18,textAlign:"center",padding:"18px 24px"}}>
+              <div style={{fontFamily:F.script,fontStyle:"italic",fontSize:20,color:P.rose}}>{tdDone} tâches complétées sur {tdTotal}</div>
+              <div style={{marginTop:10,height:5,background:"rgba(255,255,255,0.4)",borderRadius:3,overflow:"hidden"}}>
+                <div style={{width:`${tdTotal?tdDone/tdTotal*100:0}%`,height:"100%",background:`linear-gradient(to right,${P.rose}88,${P.rose})`,borderRadius:3,transition:"width .5s"}}/>
+              </div>
+            </BB>
+            {Object.entries(todos).map(([sec,tasks])=>(
+              <Card key={sec}><CI><SHead script={sec} color={P.blush}/>{tasks.map((t,i)=><BC key={i} label={t.label} checked={t.done} onChange={()=>togTd(sec,i)}/>)}</CI></Card>
+            ))}
+          </div>
+        )}
+
+        {/* BUDGET */}
+        {tab==="budget"&&(
+          <div>
+            <Card style={{background:"rgba(255,252,240,0.65)"}}><CI>
+              <div style={{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:16,textAlign:"center"}}>
+                {[{l:"Budget prévu",v:gT("prevu"),c:P.gold},{l:"Dépenses réelles",v:gT("reel"),c:P.rose},{l:"Déjà payé",v:gT("paye"),c:P.blushDk},{l:"Reste à payer",v:Math.max(0,gT("reel")-gT("paye")),c:P.mid}].map(s=>(
+                  <div key={s.l}><div style={{...BT(9),textTransform:"uppercase",letterSpacing:1.5,marginBottom:4,color:P.mid}}>{s.l}</div><div style={{fontFamily:F.script,fontStyle:"italic",fontSize:18,color:s.c}}>{s.v.toLocaleString("fr-FR")} {D}</div></div>
+                ))}
+              </div>
+            </CI></Card>
+            {bSec.map((sec,si)=>{
+              const sp=sec.items.reduce((s,i)=>s+(parseFloat(i.prevu)||0),0);
+              const sr=sec.items.reduce((s,i)=>s+(parseFloat(i.reel)||0),0);
+              const spay=sec.items.reduce((s,i)=>s+(parseFloat(i.paye)||0),0);
+              return(
+                <Card key={si}>
+                  <div style={{background:`linear-gradient(to right,${sec.color}18,transparent)`,padding:"14px 28px 0",borderBottom:`1px solid rgba(220,200,185,0.3)`}}>
+                    <SHead script={sec.section} color={`${sec.color}88`}/>
+                  </div>
+                  <div style={{overflowX:"auto"}}>
+                    <table style={{width:"100%",borderCollapse:"collapse",fontFamily:F.body,fontSize:12}}>
+                      <thead><tr style={{background:`${sec.color}0D`}}>
+                        <th style={{padding:"10px 16px",textAlign:"left",fontWeight:300,letterSpacing:1.5,fontSize:9,color:P.mid,textTransform:"uppercase"}}>Poste</th>
+                        {["Prévu","Réel","Payé","Reste"].map(h=><th key={h} style={{padding:"10px 8px",textAlign:"right",fontWeight:300,letterSpacing:1.5,fontSize:9,color:P.mid,textTransform:"uppercase"}}>{h}</th>)}
+                      </tr></thead>
+                      <tbody>
+                        {sec.items.map((item,ii)=>{
+                          const reste=Math.max(0,(parseFloat(item.reel)||0)-(parseFloat(item.paye)||0));
+                          return(
+                            <tr key={ii} style={{borderBottom:`1px solid rgba(220,200,185,0.2)`,background:ii%2===0?"transparent":"rgba(245,240,235,0.3)"}}>
+                              <td style={{padding:"9px 16px"}}><div style={{color:P.dark}}>{item.cat}</div><div style={{color:P.mid,fontSize:10}}>{item.note}</div></td>
+                              {["prevu","reel","paye"].map(f=>(
+                                <td key={f} style={{padding:"9px 8px",textAlign:"right"}}>
+                                  <input value={item[f]} onChange={e=>sBi(si,ii,f,e.target.value)} type="number" placeholder="0"
+                                    style={{width:85,border:"none",borderBottom:`1px solid ${P.line}`,background:"transparent",padding:"2px 0",fontFamily:F.body,fontSize:12,color:f==="paye"?P.gold:P.dark,outline:"none",textAlign:"right"}}/>
+                                </td>
+                              ))}
+                              <td style={{padding:"9px 8px",textAlign:"right",color:reste>0?P.rose:P.gold,fontFamily:F.body,fontSize:12}}>{reste.toLocaleString("fr-FR")}</td>
+                            </tr>
+                          );
+                        })}
+                        <tr style={{background:`${sec.color}14`,borderTop:`1.5px solid ${sec.color}44`}}>
+                          <td style={{padding:"10px 16px",fontFamily:F.script,fontStyle:"italic",fontSize:14,color:P.dark}}>Sous-total</td>
+                          <td style={{padding:"10px 8px",textAlign:"right",fontFamily:F.body,fontWeight:400,fontSize:12,color:P.gold}}>{sp.toLocaleString("fr-FR")}</td>
+                          <td style={{padding:"10px 8px",textAlign:"right",fontFamily:F.body,fontWeight:400,fontSize:12,color:P.rose}}>{sr.toLocaleString("fr-FR")}</td>
+                          <td style={{padding:"10px 8px",textAlign:"right",fontFamily:F.body,fontWeight:400,fontSize:12,color:P.blushDk}}>{spay.toLocaleString("fr-FR")}</td>
+                          <td style={{padding:"10px 8px",textAlign:"right",fontFamily:F.body,fontWeight:400,fontSize:12,color:P.mid}}>{Math.max(0,sr-spay).toLocaleString("fr-FR")}</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </Card>
+              );
+            })}
+          </div>
+        )}
+
+        {/* INVITÉS */}
+        {tab==="invites"&&(
+          <Card><CI>
+            <SHead script="Liste des familles" display="Par famille & côté"/>
+            <div style={{display:"grid",gridTemplateColumns:"2fr 1fr 80px 1fr",gap:"0 12px",marginBottom:10}}>
+              <Lbl c="Famille"/><Lbl c="Côté"/><Lbl c="Nb"/><Lbl c="Note"/>
+            </div>
+            {guests.map((fam,i)=>(
+              <div key={i} style={{display:"grid",gridTemplateColumns:"2fr 1fr 80px 1fr",gap:"0 12px",marginBottom:10,borderBottom:`1px solid rgba(220,200,185,0.25)`,paddingBottom:6}}>
+                <input value={fam.famille} onChange={e=>updG(i,"famille",e.target.value)} placeholder={`Famille ${i+1}...`} style={{border:"none",borderBottom:`1px solid ${P.line}`,background:"transparent",padding:"4px 0",fontFamily:F.script,fontStyle:"italic",fontSize:14,color:P.dark,outline:"none"}}/>
+                <select value={fam.side} onChange={e=>updG(i,"side",e.target.value)} style={{border:"none",borderBottom:`1px solid ${P.line}`,background:"transparent",fontFamily:F.body,fontSize:12,color:P.mid,outline:"none"}}>
+                  <option>Mariée</option><option>Marié</option><option>Les deux</option>
+                </select>
+                <input type="number" value={fam.nombre} onChange={e=>updG(i,"nombre",e.target.value)} style={{border:"none",borderBottom:`1px solid ${P.line}`,background:"transparent",padding:"4px 0",fontFamily:F.body,fontSize:13,color:P.rose,outline:"none",textAlign:"center"}}/>
+                <input value={fam.note} onChange={e=>updG(i,"note",e.target.value)} placeholder="Note..." style={{border:"none",borderBottom:`1px solid ${P.line}`,background:"transparent",padding:"4px 0",fontFamily:F.body,fontSize:12,color:P.mid,outline:"none"}}/>
+              </div>
+            ))}
+            <div style={{marginTop:12,padding:"12px 0",borderTop:`1px solid ${P.line}`,display:"flex",gap:32}}>
+              <div><div style={{...BT(10),textTransform:"uppercase",letterSpacing:1.5,color:P.mid}}>Total familles</div><div style={{fontFamily:F.script,fontStyle:"italic",fontSize:24,color:P.rose}}>{guests.filter(f=>f.famille).length}</div></div>
+              <div><div style={{...BT(10),textTransform:"uppercase",letterSpacing:1.5,color:P.mid}}>Total personnes</div><div style={{fontFamily:F.script,fontStyle:"italic",fontSize:24,color:P.gold}}>{guests.reduce((s,f)=>s+(parseInt(f.nombre)||0),0)}</div></div>
+            </div>
+          </CI></Card>
+        )}
+
+        {/* PRESTATAIRES */}
+        {tab==="prestataires"&&(
+          <div>
+            <div className="no-print" style={{display:"flex",gap:8,marginBottom:20}}>
+              {[{id:"compare",l:"Comparer 3 options"},{id:"final",l:"Prestataires choisis"}].map(t=>subBtn(t.id,vTab,setVTab,t.l))}
+            </div>
+            {vTab==="compare"&&vendors.map((v,vi)=>(
+              <Card key={vi}><CI>
+                <SHead script={v.cat} color={[P.blush,P.goldLt,P.blushMd][vi%3]}/>
+                <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:"0 12px"}}>
+                  {v.options.map((opt,oi)=>(
+                    <BB key={oi} style={{marginBottom:10}}>
+                      <div style={{...BT(9),textTransform:"uppercase",letterSpacing:1.5,marginBottom:8,color:[P.rose,P.gold,P.blushDk][oi]}}>Option {oi+1}</div>
+                      {[["nom","Nom / Société"],["contact","Contact"],["tel","Téléphone"],["prix",`Prix (${D})`],["note","Note"]].map(([f,l])=>(
+                        <IL key={f} label={l} value={opt[f]} onChange={val=>updVO(vi,oi,f,val)}/>
+                      ))}
+                    </BB>
+                  ))}
+                </div>
+                <div style={{marginTop:8}}><Lbl c="Option retenue"/>
+                  <input value={v.choisi} onChange={e=>updVF(vi,"choisi",e.target.value)} placeholder="Prestataire choisi..." style={{width:"100%",border:"none",borderBottom:`1.5px solid ${P.line}`,background:"transparent",padding:"6px 0",fontFamily:F.script,fontStyle:"italic",fontSize:16,color:P.rose,outline:"none"}}/>
+                </div>
+              </CI></Card>
+            ))}
+            {vTab==="final"&&vendors.map((v,vi)=>(
+              <Card key={vi}><CI>
+                <SHead script={v.cat} color={P.blush}/>
+                <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:16}}>
+                  <Lbl c="Statut"/>
+                  <select value={v.statutFinal} onChange={e=>updVF(vi,"statutFinal",e.target.value)} style={{border:`1px solid rgba(210,180,165,0.5)`,background:"rgba(253,248,242,0.7)",borderRadius:20,padding:"4px 12px",fontFamily:F.body,fontSize:11,color:P.mid,outline:"none"}}>
+                    {["À contacter","En discussion","Réservé","Annulé"].map(s=><option key={s}>{s}</option>)}
+                  </select>
+                </div>
+                <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"0 24px"}}>
+                  {[["nomFinal","Nom / Société"],["contactFinal","Contact"],["telFinal","Téléphone"],["emailFinal","Email"],["montantFinal",`Montant (${D})`]].map(([f,l])=>(
+                    <IL key={f} label={l} value={v[f]} onChange={val=>updVF(vi,f,val)}/>
+                  ))}
+                </div>
+                <TA label="Notes" value={v.notesFinal} onChange={val=>updVF(vi,"notesFinal",val)} rows={2}/>
+              </CI></Card>
+            ))}
+          </div>
+        )}
+
+        {/* STYLE */}
+        {tab==="style"&&(
+          <div>
+            <Card><CI>
+              <SHead script="Tableau d'inspiration" display="Votre moodboard"/>
+              <BB style={{marginBottom:16}}><div style={{...BT(11),fontStyle:"italic",color:P.mid,textAlign:"center"}}>✦ Ajoutez vos photos d'inspiration</div></BB>
+              <label htmlFor="photo-upload" className="photo-zone" style={{display:"block",marginBottom:16}}>
+                <input id="photo-upload" type="file" accept="image/*" multiple onChange={addPhoto}/>
+                <div style={{fontSize:24,marginBottom:6,color:P.blushMd}}>🌸</div>
+                <div style={{fontFamily:F.script,fontStyle:"italic",fontSize:15,color:P.mid,marginBottom:4}}>Cliquez pour ajouter des photos</div>
+                <div style={{...BT(11),color:P.mid,opacity:0.7}}>JPG, PNG, WEBP</div>
+              </label>
+              {inspi.photos.length>0&&(
+                <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(150px,1fr))",gap:10}}>
+                  {inspi.photos.map((ph,idx)=>(
+                    <div key={idx} style={{position:"relative",borderRadius:12,overflow:"hidden",boxShadow:"0 2px 12px rgba(150,110,80,0.12)"}}>
+                      <img src={ph.url} alt={ph.name} style={{width:"100%",height:140,objectFit:"cover",display:"block"}}/>
+                      <div style={{padding:"7px 10px",background:"rgba(255,252,248,0.9)"}}>
+                        <input value={ph.note} onChange={e=>upd(p=>({...p,inspi:{...p.inspi,photos:p.inspi.photos.map((x,i)=>i===idx?{...x,note:e.target.value}:x)}}))} placeholder="Note..." style={{width:"100%",border:"none",borderBottom:`1px solid ${P.line}`,background:"transparent",fontFamily:F.script,fontStyle:"italic",fontSize:12,color:P.dark,outline:"none"}}/>
+                      </div>
+                      <button onClick={()=>upd(p=>({...p,inspi:{...p.inspi,photos:p.inspi.photos.filter((_,i)=>i!==idx)}}))} style={{position:"absolute",top:6,right:6,background:"rgba(255,255,255,0.9)",border:"none",borderRadius:"50%",width:22,height:22,cursor:"pointer",fontSize:10,color:P.roseDk}}>✕</button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CI></Card>
+            <Card><CI>
+              <SHead script="Palette de couleurs"/>
+              <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:10}}>
+                {PALETTES.map(pal=>(
+                  <div key={pal.name} onClick={()=>upd(p=>({...p,inspi:{...p.inspi,palette:pal.name}}))} style={{background:inspi.palette===pal.name?"rgba(230,205,195,0.4)":"rgba(255,252,248,0.4)",border:`1.5px solid ${inspi.palette===pal.name?P.rose:P.line}`,borderRadius:12,padding:"12px 14px",cursor:"pointer",transition:"all .2s"}}>
+                    <div style={{display:"flex",gap:4,marginBottom:8}}>{pal.colors.map((c,i)=><div key={i} style={{flex:1,height:16,background:c,borderRadius:3}}/>)}</div>
+                    <div style={{fontFamily:F.script,fontStyle:"italic",fontSize:13,color:P.dark}}>{pal.name}</div>
+                    <div style={{...BT(10),color:P.mid}}>{pal.desc}</div>
+                    {inspi.palette===pal.name&&<div style={{fontFamily:F.body,fontSize:9,color:P.rose,marginTop:3}}>✓ Sélectionnée</div>}
+                  </div>
+                ))}
+              </div>
+            </CI></Card>
+            <Card><CI>
+              <SHead script="Style & ambiance" color={P.blushMd}/>
+              <div style={{display:"flex",flexWrap:"wrap",marginBottom:16}}>
+                {STYLES_LIST.map(s=><Tg key={s} label={s} active={inspi.styles.includes(s)} onClick={()=>upd(p=>({...p,inspi:{...p.inspi,styles:p.inspi.styles.includes(s)?p.inspi.styles.filter(x=>x!==s):[...p.inspi.styles,s]}}))}/>)}
+              </div>
+              <TA label="Notes d'inspiration" value={inspi.notes} onChange={v=>upd(p=>({...p,inspi:{...p.inspi,notes:v}}))} rows={4} placeholder="Fleurs séchées, lumières dorées, raphia, palmiers..."/>
+            </CI></Card>
+          </div>
+        )}
+
+        {/* JOUR J */}
+        {tab==="jourj"&&(
+          <div>
+            <div className="no-print" style={{display:"flex",gap:6,marginBottom:20,flexWrap:"wrap"}}>
+              {JJT.map(t=>subBtn(t.id,jTab,setJTab,t.l))}
+            </div>
+            {jTab==="countdown"&&<div>
+              <Card><CI><SHead script="Compte à rebours"/><Countdown weddingDate={couple.date}/></CI></Card>
+              <Card><CI>
+                <SHead script="Rappels & alarmes" display="Notifications sur votre téléphone"/>
+                <BB style={{marginBottom:16}}>
+                  <div style={{...BT(11),color:P.mid,fontStyle:"italic",textAlign:"center"}}>
+                    🔔 Activez les rappels pour recevoir des notifications automatiques — J-30, J-7, J-1 et le matin du grand jour
+                  </div>
+                </BB>
+                <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12,marginBottom:16}}>
+                  {[{emoji:"📅",label:"J-30",desc:"Un mois avant"},{emoji:"💍",label:"J-7",desc:"Une semaine avant"},{emoji:"🌙",label:"J-1",desc:"La veille"},{emoji:"☀️",label:"Jour J",desc:"6h du matin"}].map(r=>(
+                    <div key={r.label} style={{background:"rgba(237,213,204,0.3)",border:"1px solid rgba(210,180,165,0.3)",borderRadius:12,padding:"14px 16px",textAlign:"center"}}>
+                      <div style={{fontSize:22,marginBottom:4}}>{r.emoji}</div>
+                      <div style={{fontFamily:F.script,fontStyle:"italic",fontSize:16,color:P.rose}}>{r.label}</div>
+                      <div style={{...BT(10),color:P.mid}}>{r.desc}</div>
+                    </div>
+                  ))}
+                </div>
+                <div style={{textAlign:"center"}}>
+                  <NotifButton weddingDate={couple.date} coupleName={couple.bride&&couple.groom?`${couple.bride} & ${couple.groom}`:""}/>
+                  {!couple.date&&<div style={{...BT(11),color:P.mid,marginTop:8,fontStyle:"italic"}}>Renseignez d'abord votre date dans "Nous deux"</div>}
+                </div>
+              </CI></Card>
+            </div>}
+            {jTab==="planning"&&<Card><CI>
+              <SHead script="Planning du Jour J" display="Heure par heure"/>
+              {pjj.map((row,i)=>(
+                <div key={i} style={{display:"flex",alignItems:"center",gap:12,marginBottom:9,padding:"8px 0",borderBottom:`1px solid rgba(220,200,185,0.25)`}}>
+                  <div style={{width:26,height:26,borderRadius:"50%",background:i%2===0?"rgba(237,213,204,0.6)":"rgba(222,200,152,0.6)",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
+                    <span style={{fontSize:10,color:P.rose,fontFamily:F.body}}>{i+1}</span>
+                  </div>
+                  <div style={{...BT(13),color:P.dark,flex:1}}>{row.m}</div>
+                  <input value={row.h} onChange={e=>upd(p=>({...p,pjj:p.pjj.map((r,j)=>j===i?{...r,h:e.target.value}:r)}))} placeholder="__ h __" style={{width:75,border:"none",borderBottom:`1px solid ${P.line}`,background:"transparent",padding:"2px 0",fontFamily:F.script,fontStyle:"italic",fontSize:14,color:P.rose,outline:"none",textAlign:"center"}}/>
+                </div>
+              ))}
+            </CI></Card>}
+            {jTab==="contacts"&&<Card><CI>
+              <SHead script="Contacts urgents" display="À imprimer pour les témoins"/>
+              <BB style={{marginBottom:16}}><div style={{...BT(11),fontStyle:"italic",textAlign:"center",color:P.mid}}>✦ Imprimez cette page et donnez-la à vos témoins le matin du mariage</div></BB>
+              {urg.map((c,i)=>(
+                <div key={i} style={{display:"grid",gridTemplateColumns:"150px 1fr 1fr",gap:"0 16px",alignItems:"end",marginBottom:12,paddingBottom:10,borderBottom:`1px solid rgba(220,200,185,0.25)`}}>
+                  <div style={{fontFamily:F.body,fontWeight:400,fontSize:12,color:P.rose,paddingTop:16}}>{c.role}</div>
+                  <IL label="Nom" value={c.nom} onChange={v=>updU(i,"nom",v)}/>
+                  <IL label="Téléphone" value={c.tel} onChange={v=>updU(i,"tel",v)} placeholder="📞"/>
+                </div>
+              ))}
+            </CI></Card>}
+            {jTab==="checklist"&&<Card><CI>
+              <SHead script="Liste de vérification finale"/>
+              <BB style={{marginBottom:14}}>
+                <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+                  <div style={{fontFamily:F.script,fontStyle:"italic",fontSize:16,color:P.rose}}>{jjCheck.filter(t=>t.done).length} / {jjCheck.length}</div>
+                  <div style={{width:120,height:4,background:"rgba(255,255,255,0.5)",borderRadius:2,overflow:"hidden"}}><div style={{width:`${jjCheck.filter(t=>t.done).length/jjCheck.length*100}%`,height:"100%",background:P.rose,borderRadius:2}}/></div>
+                </div>
+              </BB>
+              {jjCheck.map((t,i)=><BC key={i} label={t.label} checked={t.done} onChange={v=>upd(p=>({...p,jjCheck:p.jjCheck.map((x,j)=>j===i?{...x,done:v}:x)}))}/>)}
+            </CI></Card>}
+            {jTab==="voeux"&&<div>
+              <Card><CI><SHead script="Vœux de la mariée" color={P.blush}/><TA value={voeux.mariee} onChange={v=>upd(p=>({...p,voeux:{...p.voeux,mariee:v}}))} rows={10} placeholder="Chers amis, chère famille..."/></CI></Card>
+              <Card><CI><SHead script="Vœux du marié" color={P.goldLt}/><TA value={voeux.marie} onChange={v=>upd(p=>({...p,voeux:{...p.voeux,marie:v}}))} rows={10} placeholder="Mes amis, ma famille..."/></CI></Card>
+            </div>}
+            {jTab==="kit"&&<Card><CI>
+              <SHead script="Kit survie mariée"/>
+              <BB style={{marginBottom:14}}><div style={{...BT(11),fontStyle:"italic",textAlign:"center",color:P.mid}}>💼 Confiez ce pochon à votre témoin principale</div></BB>
+              <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"0 16px"}}>
+                {kit.map((t,i)=><BC key={i} label={t.label} checked={t.done} onChange={v=>upd(p=>({...p,kit:p.kit.map((x,j)=>j===i?{...x,done:v}:x)}))}/>)}
+              </div>
+            </CI></Card>}
+          </div>
+        )}
+
+        {/* NOTES */}
+        {tab==="notes"&&(
+          <div>
+            {[{key:"general",script:"Notes libres",bc:P.blush,rows:8,ph:"Pensées, idées, questions..."},{key:"beauty",script:"Beauté & soins",bc:P.blushMd,rows:5,ph:"Rendez-vous, produits, soins..."},{key:"honeymoon",script:"Voyage de noces",bc:P.goldLt,rows:5,ph:"Destination, hôtel, activités..."}].map(s=>(
+              <Card key={s.key}><CI><SHead script={s.script} color={s.bc}/><TA value={notes[s.key]} onChange={v=>upd(p=>({...p,notes:{...p.notes,[s.key]:v}}))} rows={s.rows} placeholder={s.ph}/></CI></Card>
+            ))}
+          </div>
+        )}
+
+      </div>
+      <div style={{textAlign:"center",padding:"12px 0 40px",position:"relative",zIndex:1}} className="no-print">
+        <div style={{fontFamily:F.script,fontStyle:"italic",fontSize:14,color:P.rose,opacity:0.6}}>♡ Andro iray toa zato</div>
+      </div>
+    </div>
+  );
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+// RESET PASSWORD SCREEN
+// ══════════════════════════════════════════════════════════════════════════
+function ResetPasswordScreen({onDone}){
+  const [pwd,setPwd]=useState("");
+  const [pwd2,setPwd2]=useState("");
+  const [loading,setLoading]=useState(false);
+  const [msg,setMsg]=useState(null);
+
+  const submit=async()=>{
+    if(!pwd||!pwd2){setMsg({type:"error",text:"Veuillez remplir les deux champs."});return;}
+    if(pwd!==pwd2){setMsg({type:"error",text:"Les mots de passe ne correspondent pas."});return;}
+    if(pwd.length<6){setMsg({type:"error",text:"Mot de passe trop court (6 caractères minimum)."});return;}
+    setLoading(true);setMsg(null);
+    const {error}=await sb.auth.updateUser({password:pwd});
+    setLoading(false);
+    if(error){setMsg({type:"error",text:error.message});return;}
+    setMsg({type:"success",text:"Mot de passe modifié ! Redirection..."});
+    setTimeout(()=>onDone(),1500);
+  };
+
+  const inputStyle={width:"100%",boxSizing:"border-box",background:"rgba(255,252,248,0.6)",border:"1px solid rgba(210,185,170,0.5)",borderRadius:12,padding:"14px 18px",fontFamily:F.body,fontWeight:300,fontSize:14,color:P.dark,marginBottom:12,backdropFilter:"blur(4px)"};
+
+  return(
+    <div style={{minHeight:"100vh",background:"linear-gradient(165deg,#F0E8DE 0%,#EDE0D4 35%,#E8D8CC 65%,#F0E4D8 100%)",display:"flex",alignItems:"center",justifyContent:"center",padding:"40px 24px",position:"relative",overflow:"hidden"}}>
+      <WatercolorBg/>
+      <div style={{position:"absolute",top:0,right:0,pointerEvents:"none"}}><FloralCorner size={240} color="#A87858" opacity={0.2}/></div>
+      <div style={{position:"relative",zIndex:2,width:"100%",maxWidth:400}}>
+        <div style={{textAlign:"center",marginBottom:32}}>
+          <div style={{fontFamily:F.script,fontStyle:"italic",fontSize:52,color:P.dark,lineHeight:0.95}}>Andro iray</div>
+          <div style={{fontFamily:F.script,fontStyle:"italic",fontSize:64,color:P.gold,lineHeight:0.9}}>toa zato</div>
+          <div style={{marginTop:14}}><OilStroke color={P.blushMd} opacity={0.6} height={5}/></div>
+        </div>
+        <div style={{background:"rgba(255,252,248,0.78)",backdropFilter:"blur(16px)",WebkitBackdropFilter:"blur(16px)",borderRadius:20,border:"1px solid rgba(220,200,185,0.5)",boxShadow:"0 8px 40px rgba(160,120,80,0.12)",padding:"32px 32px 28px"}}>
+          <div style={{fontFamily:F.script,fontStyle:"italic",fontSize:22,color:P.dark,marginBottom:6}}>Nouveau mot de passe</div>
+          <OilStroke color={P.blush} opacity={0.5} height={4}/>
+          <div style={{...BT(12),color:P.mid,marginTop:12,marginBottom:20}}>Choisissez votre nouveau mot de passe</div>
+
+          {msg&&(
+            <div style={{background:msg.type==="error"?"rgba(184,104,112,0.12)":"rgba(100,160,100,0.12)",border:`1px solid ${msg.type==="error"?"rgba(184,104,112,0.3)":"rgba(100,160,100,0.3)"}`,borderRadius:10,padding:"10px 14px",marginBottom:16,fontFamily:F.body,fontWeight:300,fontSize:12,color:msg.type==="error"?P.roseDk:"#3A7A3A"}}>
+              {msg.text}
+            </div>
+          )}
+
+          <input type="password" value={pwd} onChange={e=>setPwd(e.target.value)} placeholder="Nouveau mot de passe" style={inputStyle}/>
+          <input type="password" value={pwd2} onChange={e=>setPwd2(e.target.value)} placeholder="Confirmer le mot de passe" style={inputStyle} onKeyDown={e=>e.key==="Enter"&&submit()}/>
+
+          <button onClick={submit} disabled={loading} style={{width:"100%",background:`linear-gradient(135deg,${P.gold},#A07040)`,color:"rgba(255,252,245,0.96)",border:"none",borderRadius:50,padding:"15px",cursor:loading?"not-allowed":"pointer",fontFamily:F.body,fontWeight:300,fontSize:12,letterSpacing:3,textTransform:"uppercase",boxShadow:"0 6px 24px rgba(160,110,50,0.28)",marginTop:4,display:"flex",alignItems:"center",justifyContent:"center",gap:10}}>
+            {loading&&<span className="spinner"/>}
+            Enregistrer
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+// ROOT
+// ══════════════════════════════════════════════════════════════════════════
+function App(){
+  const [user,setUser]=useState(undefined);
+  const [isReset,setIsReset]=useState(false);
+
+  useEffect(()=>{
+    // Détecter si on arrive depuis un lien de réinitialisation
+    const hash=window.location.hash;
+    if(hash.includes("type=recovery")||hash.includes("access_token")&&hash.includes("type=recovery")){
+      setIsReset(true);
+    }
+    sb.auth.getSession().then(({data:{session}})=>setUser(session?.user||null));
+    const {data:{subscription}}=sb.auth.onAuthStateChange((event,session)=>{
+      if(event==="PASSWORD_RECOVERY"){setIsReset(true);}
+      setUser(session?.user||null);
+    });
+    return()=>subscription.unsubscribe();
+  },[]);
+
+  if(user===undefined)return(
+    <div style={{minHeight:"100vh",display:"flex",alignItems:"center",justifyContent:"center",background:"linear-gradient(165deg,#F0E8DE,#EDE0D4)"}}>
+      <WatercolorBg/>
+      <div style={{position:"relative",zIndex:1,textAlign:"center"}}>
+        <span className="spinner" style={{width:36,height:36,borderWidth:3,borderColor:"rgba(184,137,90,0.3)",borderTopColor:P.gold}}/>
+      </div>
+    </div>
+  );
+
+  // Afficher le formulaire de réinitialisation si on arrive depuis le lien email
+  if(isReset&&user)return <ResetPasswordScreen onDone={()=>{setIsReset(false);window.location.hash="";}}/>;
+  if(!user)return <AuthScreen onAuth={()=>sb.auth.getSession().then(({data:{session}})=>setUser(session?.user||null))}/>;
+  return <MainApp user={user} onSignOut={async()=>{await sb.auth.signOut();setUser(null);}}/>;
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+</script>
+
+<script>
+// ── Service Worker Registration ───────────────────────────────────────────
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js')
+      .then(reg => {
+        console.log('SW registered:', reg.scope);
+        // Background sync every 15 min
+        if ('periodicSync' in reg) {
+          reg.periodicSync.register('check-reminders', { minInterval: 15 * 60 * 1000 }).catch(() => {});
+        }
+      })
+      .catch(err => console.log('SW error:', err));
+  });
+}
+
+// ── IndexedDB helper for reminders ───────────────────────────────────────
+window.AndroReminders = {
+  openDB: () => new Promise((resolve, reject) => {
+    const req = indexedDB.open('andro-reminders', 1);
+    req.onupgradeneeded = e => {
+      const db = e.target.result;
+      if (!db.objectStoreNames.contains('reminders')) {
+        db.createObjectStore('reminders', { keyPath: 'id' });
+      }
+    };
+    req.onsuccess = e => resolve(e.target.result);
+    req.onerror = () => reject(req.error);
+  }),
+
+  addReminder: async (id, title, body, time) => {
+    const db = await window.AndroReminders.openDB();
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction('reminders', 'readwrite');
+      tx.objectStore('reminders').put({ id, title, body, time, sent: false });
+      tx.oncomplete = resolve;
+      tx.onerror = () => reject(tx.error);
+    });
+  },
+
+  deleteReminder: async (id) => {
+    const db = await window.AndroReminders.openDB();
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction('reminders', 'readwrite');
+      tx.objectStore('reminders').delete(id);
+      tx.oncomplete = resolve;
+      tx.onerror = () => reject(tx.error);
+    });
+  },
+
+  getAll: async () => {
+    const db = await window.AndroReminders.openDB();
+    return new Promise((resolve, reject) => {
+      const tx = db.transaction('reminders', 'readonly');
+      const req = tx.objectStore('reminders').getAll();
+      req.onsuccess = () => resolve(req.result || []);
+      req.onerror = () => reject(req.error);
+    });
+  },
+
+  requestPermission: async () => {
+    if (!('Notification' in window)) return 'unsupported';
+    if (Notification.permission === 'granted') return 'granted';
+    if (Notification.permission === 'denied') return 'denied';
+    const result = await Notification.requestPermission();
+    return result;
+  },
+
+  scheduleWeddingAlarm: async (weddingDate, coupleName) => {
+    if (!weddingDate) return;
+    const perm = await window.AndroReminders.requestPermission();
+    if (perm !== 'granted') return;
+
+    const d = new Date(weddingDate);
+
+    // J-30
+    const minus30 = new Date(d); minus30.setDate(d.getDate() - 30); minus30.setHours(9, 0, 0, 0);
+    if (minus30 > new Date()) {
+      await window.AndroReminders.addReminder('j-30', '🌸 30 jours avant votre mariage !', `${coupleName || 'Votre grand jour'} approche — vérifiez votre to-do !`, minus30.getTime());
+    }
+
+    // J-7
+    const minus7 = new Date(d); minus7.setDate(d.getDate() - 7); minus7.setHours(9, 0, 0, 0);
+    if (minus7 > new Date()) {
+      await window.AndroReminders.addReminder('j-7', '💍 Plus que 7 jours !', 'Confirmez vos prestataires et préparez votre kit survie 💼', minus7.getTime());
+    }
+
+    // J-1
+    const minus1 = new Date(d); minus1.setDate(d.getDate() - 1); minus1.setHours(8, 0, 0, 0);
+    if (minus1 > new Date()) {
+      await window.AndroReminders.addReminder('j-1', '🎊 Demain c\'est votre mariage !', 'Reposez-vous bien ce soir ♡ Tout est prêt !', minus1.getTime());
+    }
+
+    // Jour J — 6h du matin
+    const jourJ = new Date(d); jourJ.setHours(6, 0, 0, 0);
+    if (jourJ > new Date()) {
+      await window.AndroReminders.addReminder('jour-j', '☀️ C\'est aujourd\'hui !', `Andro iray toa zato — Votre grand jour est arrivé ♡`, jourJ.getTime());
+    }
+
+    // Vérifier toutes les minutes si des notifs sont dues
+    window.AndroReminders.startPolling();
+  },
+
+  startPolling: () => {
+    if (window._androPolling) return;
+    window._androPolling = setInterval(async () => {
+      if (Notification.permission !== 'granted') return;
+      const reminders = await window.AndroReminders.getAll();
+      const now = Date.now();
+      for (const r of reminders) {
+        if (r.time <= now && !r.sent) {
+          new Notification(r.title, {
+            body: r.body,
+            icon: '/icon-192.png',
+            badge: '/icon-192.png',
+            vibrate: [200, 100, 200],
+            tag: r.id
+          });
+          const db = await window.AndroReminders.openDB();
+          const tx = db.transaction('reminders', 'readwrite');
+          const store = tx.objectStore('reminders');
+          store.put({ ...r, sent: true });
+        }
+      }
+    }, 60000); // check every minute
+  }
+};
+</script>
+</body>
+</html>
